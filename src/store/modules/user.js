@@ -4,8 +4,11 @@ import { resetRouter } from '@/router'
 
 const getDefaultState = () => {
   return {
+    // token值
     token: getToken(),
+    // 用户名
     name: '',
+    // 用户头像
     avatar: ''
   }
 }
@@ -13,44 +16,52 @@ const getDefaultState = () => {
 const state = getDefaultState()
 
 const mutations = {
+  // 重置state值
   RESET_STATE: (state) => {
     Object.assign(state, getDefaultState())
   },
+  // 设置token值
   SET_TOKEN: (state, token) => {
     state.token = token
   },
+  // 设置name值
   SET_NAME: (state, name) => {
     state.name = name
   },
+  // 设置头像
   SET_AVATAR: (state, avatar) => {
     state.avatar = avatar
   }
 }
 
 const actions = {
-  // user login
+  // 用户登录
   login({ commit }, userInfo) {
+    // 1. 解构用户信息
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
+      // 2. 调用loginAPI函数 发起请求
       login({ username: username.trim(), password: password }).then(response => {
+        // 3. 登录成功
         const { data } = response
         commit('SET_TOKEN', data.token)
         setToken(data.token)
         resolve()
       }).catch(error => {
+        // 3. 登录失败
         reject(error)
       })
     })
   },
 
-  // get user info
-  getInfo({ commit, state }) {
+  // 获取用户信息
+  getInfo({ commit }) {
     return new Promise((resolve, reject) => {
-      getInfo(state.token).then(response => {
+      getInfo().then(response => {
         const { data } = response
 
         if (!data) {
-          return reject('Verification failed, please Login again.')
+          return reject('获取数据失败 请重新登录')
         }
 
         const { name, avatar } = data
@@ -64,10 +75,10 @@ const actions = {
     })
   },
 
-  // user logout
-  logout({ commit, state }) {
+  // 退出登录
+  logout({ commit }) {
     return new Promise((resolve, reject) => {
-      logout(state.token).then(() => {
+      logout().then(() => {
         removeToken() // must remove  token  first
         resetRouter()
         commit('RESET_STATE')
